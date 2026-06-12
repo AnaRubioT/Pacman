@@ -12,25 +12,24 @@ Pac-Man speeds are stated as **approximate time to cross the maze** (about 28 ti
 
 A complete Level 1 game with Pac-Man controllable, walls respected, scoring working, lives and win/lose conditions in place.
 
-- A `<canvas>` element exists in the DOM, taller than wide, rendered each frame.
+- A `canvas` with `getContext` and `requestAnimationFrame` is in the code.
 - The maze is rendered with dark-blue walls and the iconic Pac-Man corridor pattern. *(manual)*
 - ~240 small dots are visible along the corridors. *(manual)*
 - 4 power pellets are visible near the four corners of the maze. *(manual)*
-- HUD text (score, lives) is rendered above or below the maze. It does NOT overlap the maze. *(manual)*
-- A lives counter is rendered alongside the score. *(manual)*
+- HUD `score` and `lives` are rendered above or below the maze. They do NOT overlap the maze. *(manual)*
 - Pac-Man is visible at his starting position, drawn in yellow. *(manual)*
-- Pac-Man's starting position is on an open path tile — NOT on a wall, NOT inside the ghost-house chamber, and NOT on a tile that holds a dot or power pellet. The score stays at 0 the moment the game starts and only increments once Pac-Man actually moves and eats his first pellet. *(manual)*
-- Arrow keys (or WASD) change Pac-Man's direction. A single keypress sets his direction; he moves continuously in that direction until a wall or the next direction change. *(manual)*
-- Pac-Man CANNOT pass through walls. The next-tile check is applied BEFORE the position update. *(manual)*
-- Eating a regular dot removes it from the maze and adds **10** to the score. *(manual)*
-- Eating a power pellet removes it and adds **50** to the score. *(manual)*
-- The score is rendered to the HUD each frame and updates in real time. *(manual)*
-- The side tunnel wraps: crossing one edge appears at the opposite edge. *(manual)*
-- The game starts with **3 lives**.
+- Pac-Man's starting position is on an open path tile — NOT on a wall, NOT inside the ghost-house chamber, and NOT on a tile that holds a dot or power pellet. The `score` stays at 0 the moment the game starts. *(manual)*
+- Arrow keys (or WASD) change Pac-Man's direction. A single keypress sets his direction; he moves continuously until a wall or the next direction change. *(manual)*
+- Pac-Man cannot pass through walls. The next-tile check is applied BEFORE the position update. *(manual)*
+- Eating a regular dot removes it from the maze and adds **10** to the `score`. *(manual)*
+- Eating a power pellet removes it and adds **50** to the `score`. *(manual)*
+- The `score` updates in the HUD in real time. *(manual)*
+- The side `tunnel` wraps: crossing one edge appears at the opposite edge. *(manual)*
+- The code initializes `lives = 3`.
 - A win condition fires when all pickups (dots + pellets) are eaten. *(manual)*
 - A "READY!" (or SPACE-to-start) state shows at game start. *(manual)*
-- When Pac-Man dies, the life count decrements, and either respawn happens (lives > 0) or "GAME OVER" appears (lives = 0). *(manual)*
-- A Pac-Man speed constant or variable exists in code (any reasonable value — does not need to vary by level yet).
+- When Pac-Man dies, `lives` decrements, and either respawn happens or "GAME OVER" appears. *(manual)*
+- The code uses `pacman.speed` (or similar) for Pac-Man's movement speed.
 
 **Pac-Man speed at Level 1 (per spec §5):** approximately **4 seconds** to cross the maze in a clear corridor. The actual feel is verified by playing — Pac-Man should not zip across in under 2 seconds, and should not crawl. *(manual)*
 
@@ -42,9 +41,9 @@ All of Tier 1, plus multi-level scaling and the persistent / structured features
 
 - A `level` variable tracks the current level, starts at 1, increments on level clear.
 - Level transition resets entities to starting positions, refills the maze, advances `level` by 1, then resumes play.
-- A **Pac-Man speed table** indexed by `level` is defined in code. The Level 2-4 value differs from the Level 1 value.
-- The high score persists across page reloads via `localStorage` (or equivalent). The identifier `localStorage` appears in code.
-- A bonus life is awarded once per run when the score crosses **10,000 points**. The literal `10000` appears in code.
+- A `pacmanSpeed` table (or `speeds[level]`) is indexed by `level`. The Level 2-4 value differs from the Level 1 value.
+- `localStorage` is used to persist the high score across page reloads.
+- The `score` triggers a bonus life at `10000` points.
 
 **Pac-Man speed at Levels 2-4:**
 
@@ -59,7 +58,7 @@ The speed table is actually applied each frame — Pac-Man visibly moves faster 
 
 All of Tier 2, plus per-level scaling for Levels 5-20.
 
-- The Pac-Man speed table includes distinct values for the Levels 5-20 range, different from the Levels 2-4 range.
+- The `pacmanSpeed` table has distinct entries for `level` 5-20, different from Levels 2-4.
 
 **Pac-Man speed at Levels 5-20:**
 
@@ -74,10 +73,10 @@ Pac-Man visibly moves faster at Level 5+ than at Level 4. *(manual)*
 
 All of Tier 3, plus the Level 21+ regression and the end-of-run handling.
 
-- The Pac-Man speed table has a Levels 21+ row distinct from Levels 5-20. The value matches Levels 2-4 (regression to slower speed).
+- The `pacmanSpeed` table has a `level` 21+ entry that matches the Level 2-4 row (regression to slower).
 - The game runs cleanly through Levels 21 to 255 with no crashes or stalls. *(manual)*
-- Clearing **Level 255** ends the run with a final-screen overlay (e.g. "CONGRATULATIONS — Level 255 cleared!"). The game does NOT advance to a Level 256. *(manual)*
-- No earlier-tier feature has regressed. Pac-Man movement, wall collision, dot/pellet eating, win condition, level transitions, HUD, score and high score all still work as they did at Tier 1-3.
+- Clearing `level === 255` ends the run with a final-screen overlay. The game does NOT advance to a Level 256. *(manual)*
+- No earlier-tier feature has regressed. Pac-Man movement, wall collision, dot/pellet eating, win condition, level transitions, HUD, `score` and high score all still work as they did at Tier 1-3.
 
 **Pac-Man speed at Levels 21+:**
 
