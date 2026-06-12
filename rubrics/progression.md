@@ -12,7 +12,7 @@ Cruise Elroy speeds are stated as **approximate time to cross the maze**.
 
 A single-level game runs cleanly: Pac-Man can clear the maze, lose lives, win or game-over. No crashes or stalls during normal play.
 
-- The game has Level 1 fully playable end-to-end — maze, Pac-Man, four ghosts, dots, power pellets, frightened mode. *(manual — confirmed by the rest of the rubrics' Tier 1)*
+- The game has Level 1 fully playable end-to-end — maze, Pac-Man, four ghosts, dots, power pellets, frightened mode. *(manual)*
 - The win condition fires when all Level-1 pickups are eaten, and a "YOU WIN" overlay (or equivalent) is shown. *(manual)*
 - The lose condition fires when lives reach 0 and a "GAME OVER" overlay is shown. *(manual)*
 - The game does not crash, hang, or infinite-loop during normal play. *(manual)*

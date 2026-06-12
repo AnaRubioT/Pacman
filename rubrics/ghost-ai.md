@@ -10,56 +10,51 @@ Ghost speeds are stated as **approximate time to cross the maze**. The manual pl
 
 ## Tier 1 — Level 1 baseline
 
-Four ghosts present, distinct AI per ghost, scatter/chase mode timer working at Level 1 durations, ghost-house emergence rule for Level 1.
+Four ghosts present, each with a distinct chase target function, walls respected, basic direction selection.
 
-- Exactly **four** ghost entities exist, identifiable in code as Blinky, Pinky, Inky, Clyde (by class name, instance name, color tag, or comparable identifier). *(static)*
-- Each ghost has the correct body color: Blinky red, Pinky pink, Inky cyan, Clyde orange. *(static; verified by hex code OR word name)*
-- Blinky starts OUTSIDE the ghost-house chamber, on the tile immediately above the pink gate. Pinky, Inky, Clyde start INSIDE the chamber. *(manual)*
-- All four ghosts respect walls — none can pass through wall tiles. The pink gate is passable for ghosts only. *(manual)*
-- At each tile transition, a ghost selects its next direction ONCE (locked between transitions, not recomputed every frame). *(static — look for the tile-entry guard)*
-- The **no-reverse rule** is enforced: in the direction-selection code, the direction opposite the ghost's current travel is excluded from candidates. *(static)*
-- Each ghost computes a distinct chase-mode target tile (per spec §6.2):
-  - **Blinky:** target = Pac-Man's current tile. *(static)*
-  - **Pinky:** target = 4 tiles ahead of Pac-Man in his direction. The literal `4` or a named look-ahead constant appears in Pinky's target code. *(static)*
-  - **Inky:** target uses BOTH Pac-Man's and Blinky's positions. A reference to Blinky's identifier appears inside Inky's target computation. *(static)*
-  - **Clyde:** target switches between Pac-Man's tile and Clyde's scatter corner based on an 8-tile distance check. The literal `8` (or a constant of that value) appears in Clyde's target code. *(static)*
-- Direction selection minimizes Euclidean (or Manhattan) distance to the current target tile. *(static / partial)*
-- Tie-breaking preference order: **up, left, down, right**. *(static / partial)*
+- Exactly **four** ghost entities exist, identifiable in code as Blinky, Pinky, Inky, Clyde (by class name, instance name, color tag, or comparable identifier).
+- Each ghost has the correct body color: Blinky red, Pinky pink, Inky cyan, Clyde orange. The hex codes `#ff0000`, `#ffb8ff`, `#00ffff`, `#ffb852` (or the word names) appear in code.
+- Ghosts start at their assigned positions inside or above the ghost-house chamber. *(manual)*
+- All four ghosts respect walls — none can pass through wall tiles. *(manual)*
+- At each tile transition, a ghost selects its next direction (locked between transitions, not recomputed every frame).
+- The **no-reverse rule** is enforced: in the direction-selection code, the direction opposite the ghost's current travel is excluded from candidates.
+- Each ghost has its own chase-target function — the four ghosts behave differently from each other. *(manual — confirm by watching their paths)*
+  - **Blinky:** target = Pac-Man's current tile.
+  - **Pinky:** target = some number of tiles ahead of Pac-Man. The literal `4` (or a named look-ahead constant) appears in Pinky's target code.
+  - **Inky:** has its own target formula, distinct from Blinky's and Pinky's.
+  - **Clyde:** has a distance-based switch between chasing Pac-Man and retreating.
+- Direction selection picks the direction that minimizes distance to the current target tile.
 - Random direction selection is NOT used in CHASE mode. *(manual — confirm ghosts behave differently from each other)*
-- Each ghost has a defined scatter corner: Blinky top-right, Pinky top-left, Inky bottom-right, Clyde bottom-left. *(static — corner targets observable in code)*
-- A **global scatter/chase mode timer** drives all four ghosts. The Level-1 phase sequence is `[scatter 7s, chase 20s, scatter 7s, chase 20s, scatter 5s, chase 20s, scatter 5s, chase indefinite]`. The literals `7` and `20` appear in code. *(static)*
-- Every scatter↔chase transition forces every active ghost to reverse direction once. *(manual — confirm visible reversal at the 7s mark)*
 - Pac-Man colliding with a non-frightened ghost has consequence (life lost, game over, or reset). *(manual)*
-
-**Ghost-house emergence at Level 1:**
-
-- Blinky: outside at start.
-- Pinky: exits immediately.
-- Inky: exits after Pac-Man has eaten **30 dots**. The literal `30` appears in code. *(static)*
-- Clyde: exits after Pac-Man has eaten **60 dots**. The literal `60` appears in code. *(static)*
-- After Pac-Man dies, a global counter releases ghosts at Pinky=7, Inky=17, Clyde=32 dots. *(static — literals 7, 17, 32 appear)*
-- A no-dot timer at **4 seconds** force-releases the next waiting ghost if Pac-Man stops eating. *(static — literal 4 appears in seconds form)*
+- A ghost speed constant or variable exists in code (any reasonable value — does not need to vary by level yet).
 
 **Ghost speeds at Level 1 (per spec §6.7):**
 
 | State | Time to cross maze |
 |---|---|
 | Chase / scatter (clear corridor) | ~5.5 sec |
-| In tunnel | ~9-10 sec |
 | Eaten (eyes returning home) | ~2-2.5 sec |
 
-A Level-1 ghost speed constant or table is observable in code. *(static)* Ghosts are visibly slower than Pac-Man in a corridor at Level 1, much slower in the tunnel, and much faster when returning as eyes. *(manual)*
+Ghosts are visibly slower than Pac-Man in a corridor at Level 1, and much faster when returning as eyes. *(manual)*
 
 ---
 
 ## Tier 2 — Levels 2-4
 
-All of Tier 1, plus per-level scaling for Levels 2-4 and the longer chase-3 phase.
+All of Tier 1, plus the arcade-accurate AI structure (scatter/chase mode timer, ghost-house emergence, scatter corners) and per-level scaling for Levels 2-4.
 
-- Ghost speed table indexed by `level` is defined; Levels 2-4 values differ from Level 1. *(static)*
-- The mode-timer phase durations for Levels 2-4 are observable in code. The third chase phase is much longer than at Level 1 (over 17 minutes in arcade — any "very long" value is acceptable). *(static)*
-- Ghost-house emergence at Levels 2+: Inky leaves immediately at Level 2. Clyde waits **50 dots** at Level 2, then 0 from Level 3+. *(static — literal 50 appears)*
-- No-dot timer drops to **3 seconds** at Level 5+ (state the threshold; this is a Tier-3 manual check). For Tier 2 it remains 4 sec.
+- Each ghost has a defined scatter corner: Blinky top-right, Pinky top-left, Inky bottom-right, Clyde bottom-left. The four corner targets are observable in code.
+- **Inky's** target code references Blinky's identifier — Inky's formula uses both Pac-Man's and Blinky's positions.
+- **Clyde's** target code uses a literal `8` (or a constant of that value) as the distance switch between chasing Pac-Man and retreating to his scatter corner.
+- Tie-breaking preference order: **up, left, down, right**.
+- A **global scatter/chase mode timer** drives all four ghosts. The Level-1 phase sequence is `[scatter 7s, chase 20s, scatter 7s, chase 20s, scatter 5s, chase 20s, scatter 5s, chase indefinite]`. The literals `7` and `20` appear in code.
+- Every scatter↔chase transition forces every active ghost to reverse direction once. *(manual)*
+- **Ghost-house emergence at Level 1:** Inky exits after Pac-Man has eaten **30 dots** (the literal `30` appears). Clyde exits after **60 dots** (the literal `60` appears).
+- A **no-dot timer** at **4 seconds** force-releases the next waiting ghost if Pac-Man stops eating. The literal `4` appears in seconds form.
+- After Pac-Man dies, a global counter releases ghosts at Pinky=7, Inky=17, Clyde=32 dots. The literals `7`, `17`, `32` appear.
+- Ghost speed table indexed by `level` is defined; Levels 2-4 values differ from Level 1.
+- A tunnel-speed branch exists; ghosts slow down in the side tunnel.
+- The mode-timer phase durations for Levels 2-4 are observable. The third chase phase is much longer than at Level 1 (any "very long" value is acceptable).
 
 **Ghost speeds at Levels 2-4:**
 
@@ -76,10 +71,10 @@ Ghosts visibly move faster at Level 2 than at Level 1. *(manual)*
 
 All of Tier 2, plus per-level scaling for Levels 5-20, red zones, and Cruise Elroy interactions (Elroy itself lives in PROGRESSION, but the speed-up effect on Blinky should be visible here).
 
-- Ghost speed table has distinct Levels 5+ values, different from Levels 2-4. *(static)*
-- **Red-zone "no upward turn" rule** is implemented at four specific tiles (two above the ghost house, two in the lower middle). Ghosts in chase or scatter mode at these tiles cannot select "up". Frightened and eaten ghosts ignore the rule. *(static — look for the red-zone exclusion gated on ghost mode)*
-- No-dot timer drops to **3 seconds** at Level 5+. *(static — literal 3 appears in a per-level branching)*
-- The global mode timer applies the Levels 5+ row of durations (`[scatter 5s, chase 20s, scatter 5s, chase 20s, scatter 5s, chase very-long, ...]`). *(static)*
+- Ghost speed table has distinct Levels 5+ values, different from Levels 2-4.
+- **Red-zone "no upward turn" rule** is implemented at four specific tiles (two above the ghost house, two in the lower middle). Ghosts in chase or scatter mode at these tiles cannot select "up". Frightened and eaten ghosts ignore the rule.
+- No-dot timer drops to **3 seconds** at Level 5+. The literal `3` appears in a per-level branching.
+- The global mode timer applies the Levels 5+ row of durations (`[scatter 5s, chase 20s, scatter 5s, chase 20s, scatter 5s, chase very-long, ...]`).
 
 **Ghost speeds at Levels 5-20:**
 
@@ -96,7 +91,7 @@ Ghosts at Level 5+ are about the same speed as Pac-Man in a clear corridor, so P
 
 All of Tier 3. The Level 21+ row of the ghost speed table is present and matches the Levels 5-20 values (no further regression in ghost speed; they stay fast).
 
-- Ghost speed table has a Levels 21+ row. The values are the same as Levels 5-20 (ghosts do NOT slow down at Level 21 the way Pac-Man does). *(static)*
+- Ghost speed table has a Levels 21+ row. The values are the same as Levels 5-20 (ghosts do NOT slow down at Level 21 the way Pac-Man does).
 - The game runs cleanly through Levels 21 to 255 with ghosts still moving, AI still working, ghost-house emergence still firing as expected. *(manual)*
 - No earlier-tier feature has regressed. The four named ghosts, distinct chase formulas, mode timer, forced reversals, red zones, and ghost-house emergence rules all still work.
 
